@@ -4,8 +4,8 @@ import sys
 import os
 from pathlib import Path
 
-from fake_useragent import UserAgent
-from bs4 import BeautifulSoup
+from fake_useragent import UserAgent    # "fake-useragent" by hellysmile
+from bs4 import BeautifulSoup           # "beautifulsoup4" by Leonard Richardson
 
 # _____ ARGUMENTS PARSER _______________________________________________________________________________________________
 
@@ -57,6 +57,7 @@ def get_html_source_code_from(url):
     :param url: the url we want the source code
     :return: the source code
     """
+    response = ""
     try:
         request = urllib.request.Request(url, headers=user_agent_header)
         response = urllib.request.urlopen(request)
@@ -67,7 +68,7 @@ def get_html_source_code_from(url):
         if value_error.args[0].startswith("unknown url type"):
             print("[ERROR_02] An URL starts with http:// or https://")
             sys.exit(1)
-    return BeautifulSoup(response.read(), "html.parser")
+    return BeautifulSoup(response.read(), "html.parser") if response != "" else ""
 
 
 def browse_windows10spotlight(url):

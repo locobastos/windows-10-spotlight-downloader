@@ -36,3 +36,6 @@ This script allows you to download all images from this website.
       In other words, it will update from page 1 on the script directory.
    ```
 
+### Icon
+
+Icon found on flaticon.com. It is created by Freepik. Thank you!
