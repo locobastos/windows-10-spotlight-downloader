@@ -10,7 +10,7 @@ This script allows you to download all images from this website.
 ### Usage
 
    ```
-   usage: Windows10SpotlighDownloader.py [OPTIONS [OPTIONS]]
+   usage: windows-10-spotlight-downloader.py [OPTIONS [OPTIONS]]
    
    OPTIONS
       -f, --full-update       Do a full update of your library = Check all images,
@@ -31,7 +31,7 @@ This script allows you to download all images from this website.
    DEFAULT BEHAVIOR
       Without argument, the behavior is the same as
        
-          Windows10SpotlighDownloader.py --output-directory . --page-number 1 --update --website https://windows10spotlight.com
+          windows-10-spotlight-downloader.py --output-directory . --page-number 1 --update --website https://windows10spotlight.com
       
       In other words, it will update from page 1 on the script directory.
    ```

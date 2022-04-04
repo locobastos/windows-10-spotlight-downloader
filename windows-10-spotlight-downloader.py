@@ -1,11 +1,12 @@
 import argparse
+import urllib.error
 import urllib.request
 import sys
 import os
 from pathlib import Path
 
-from fake_useragent import UserAgent    # "fake-useragent" by hellysmile
-from bs4 import BeautifulSoup           # "beautifulsoup4" by Leonard Richardson
+from fake_useragent import UserAgent  # "fake-useragent-ex" by hellysmile
+from bs4 import BeautifulSoup  # "beautifulsoup4" by Leonard Richardson
 
 # _____ ARGUMENTS PARSER _______________________________________________________________________________________________
 
@@ -33,7 +34,7 @@ parser.add_argument('-p', '--page-number',
                     type=int,
                     action='store',
                     dest='page_number',
-                    default=0,
+                    default=1,
                     help='The page number to start to download')
 parser.add_argument('-u', '--update',
                     action='store_true',
@@ -61,7 +62,7 @@ def get_html_source_code_from(url):
     try:
         request = urllib.request.Request(url, headers=user_agent_header)
         response = urllib.request.urlopen(request)
-    except (urllib.request.HTTPError, urllib.request.URLError):
+    except (urllib.error.HTTPError, urllib.error.URLError):
         print("[ERROR_01] This website is not compatible with my python script or the page number does not exist.")
         sys.exit(1)
     except ValueError as value_error:
@@ -79,24 +80,25 @@ def browse_windows10spotlight(url):
     """
     if not args.no_download:
         print("Grabbing: " + url)
-    soup = get_html_source_code_from(url)
+    if "uncategorized" not in url:
+        soup = get_html_source_code_from(url)
 
-    # We have 2 possibilities:
-    #   1) We are on a "page" page (e.g. https://windows10spotlight.com/page/123)
-    #      ==> We have "h2" HTML tags
-    if len(soup.find_all('h2')) > 0:
-        for h2_tag in soup.find_all('h2'):
-            # h2_tag is a Tag type if it has <a href> tag (e.g. <h2><a href='...'></a></h2>)
-            if not isinstance(h2_tag.contents[0], str):
-                browse_windows10spotlight(h2_tag.contents[0]['href'])
-            # h2_tag is a string if it has no <a href> tag (e.g. <h2>This is a text</h2>)
-            else:
-                args.page_number += 1
-                browse_windows10spotlight(args.website + '/page/' + str(args.page_number))
-    #   2) We are on a "images" page (e.g https://windows10spotlight.com/images/a7fb8314253bb986d7f4676a324d2c25)
-    #      ==> We do not have "h2" HTML tag
-    elif len(soup.find_all('h2')) == 0:
-        download_spotlight_image(soup.find('figure').contents[0]['href'])
+        # We have 3 possibilities:
+        #   1) We are on a "page" page (e.g. https://windows10spotlight.com/page/123)
+        #      ==> We have "h2" HTML tags
+        if len(soup.find_all('h2')) > 0:
+            for h2_tag in soup.find_all('h2'):
+                # h2_tag is a Tag type if it has <a href> tag (e.g. <h2><a href='...'></a></h2>)
+                if not isinstance(h2_tag.contents[0], str):
+                    browse_windows10spotlight(h2_tag.contents[0]['href'])
+                # h2_tag is a string if it has no <a href> tag (e.g. <h2>This is a text</h2>)
+                else:
+                    args.page_number += 1
+                    browse_windows10spotlight(args.website + '/page/' + str(args.page_number))
+        #   2) We are on a "images" page (e.g https://windows10spotlight.com/images/a7fb8314253bb986d7f4676a324d2c25)
+        #      ==> We do not have "h2" HTML tag
+        elif len(soup.find_all('h2')) == 0:
+            download_spotlight_image(soup.find('figure').contents[0]['href'])
 
 
 def download_spotlight_image(href_link):
