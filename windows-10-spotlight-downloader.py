@@ -5,14 +5,14 @@ import sys
 import os
 import pathlib
 
-from fake_useragent import UserAgent  # "fake-useragent-ex" by hellysmile
+from whosyouragent import get_agent   # "Whosyouragent" by Matt Manes
 from bs4 import BeautifulSoup         # "beautifulsoup4" by Leonard Richardson
 
 
 class Windows10SpotlightDownloader:
 
     def __init__(self, p_args_parsed: argparse.Namespace, p_script_dir: str):
-        self.user_agent_header = {'User-Agent': UserAgent().chrome}
+        self.user_agent_header = {'User-Agent': get_agent()}
 
         # I do an update, by default, if "-u" or "--update" is not specified
         if p_args_parsed.update is False:
@@ -109,22 +109,29 @@ class Windows10SpotlightDownloader:
                 # We have 3 possibilities:
                 #   1) We are on a "page" page (e.g. https://windows10spotlight.com/page/123)
                 #      ==> We have "h2" HTML tags
-                if len(soup.find_all('h2')) > 2:
-                    for h2_tag in soup.find_all('h2'):
-                        if len(h2_tag.string) > 1:
-                            # h2_tag is a Tag type if it has <a href> tag (e.g. <h2><a href='...'></a></h2>)
-                            if not isinstance(h2_tag.contents[0], str):
-                                self.current_url = h2_tag.contents[0]['href']
-                                self.browse_windows10spotlight()
-                            # h2_tag is a string if it has no <a href> tag (e.g. <h2>This is a text</h2>)
-                            else:
-                                self.page_number += 1
-                                self.current_url = self.website + '/page/' + str(self.page_number)
-                                self.browse_windows10spotlight()
+                if len(soup.find_all('h2')) > 3:
+                    a = soup.find_all('h2')
+                    for h2_tag in a:
+                        if isinstance(h2_tag.string, str):
+                            if len(h2_tag.string) > 1:
+                                # h2_tag is a Tag type if it has <a href> tag (e.g. <h2><a href='...'></a></h2>)
+                                if not isinstance(h2_tag.contents[0], str):
+                                    self.current_url = h2_tag.contents[0]['href']
+                                    self.browse_windows10spotlight()
+                                # h2_tag is a string if it has no <a href> tag (e.g. <h2>This is a text</h2>)
+                                else:
+                                    self.page_number += 1
+                                    self.current_url = self.website + '/page/' + str(self.page_number)
+                                    self.browse_windows10spotlight()
                 #   2) We are on a "images" page (e.g https://windows10spotlight.com/images/a7fb8314253bb986d7f4676a324d2c25)
                 #      ==> We do not have "h2" HTML tag
-                elif len(soup.find_all('h2')) == 1:
-                    self.__download_spotlight_image(soup.find('figure').contents[0]['href'])
+                elif len(soup.find_all('h2')) == 3:
+                    try:
+                        a = soup.find('figure')
+                        self.__download_spotlight_image(soup.find('figure').contents[0]['href'])
+                    except AttributeError:
+                        b = soup.find('img')
+                        self.__download_spotlight_image(soup.find('img').attrs['src'])
 
 
 parser = argparse.ArgumentParser(

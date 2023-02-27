@@ -1,2 +1,2 @@
-fake-useragent-ex >= 0.1.12
+whosyouragent
 beautifulsoup4
